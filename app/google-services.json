@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "347687878749",
+    "project_id": "alertmate-6f844",
+    "storage_bucket": "alertmate-6f844.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:347687878749:android:a9c2f45f6c805860bc0db4",
+        "android_client_info": {
+          "package_name": "com.example.alertmate"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDZrUymHE0HRVeYGJn0a0Zh-YHgN5Yric0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

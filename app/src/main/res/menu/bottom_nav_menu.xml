@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/bott_profile"
+        android:title="Profile"
+        android:icon="@drawable/user"/>
+
+    <item
+        android:id="@+id/bott_news"
+        android:title="News"
+        android:icon="@drawable/news"/>
+
+    <item
+        android:id="@+id/bott_home"
+        android:title="Home"
+        android:icon="@drawable/home"/>
+
+    <item
+        android:id="@+id/bott_alert"
+        android:title="Alert"
+        android:icon="@drawable/notification"/>
+
+    <item
+        android:id="@+id/bott_tips"
+        android:title="Tips"
+        android:icon="@drawable/services"/>
+
+</menu>
