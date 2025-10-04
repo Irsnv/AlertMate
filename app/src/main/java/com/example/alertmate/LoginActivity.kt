@@ -9,6 +9,7 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import com.example.alertmate.MainActivity
 import com.example.alertmate.databinding.ActivityLoginBinding
 import com.google.firebase.auth.FirebaseAuth
 
@@ -32,11 +33,37 @@ class LoginActivity: AppCompatActivity() {
 
                 firebaseAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener {
                     if (it.isSuccessful) {
-                        val intent = Intent(this, MainActivity::class.java)
-                        startActivity(intent)
+                        val uid = firebaseAuth.currentUser?.uid
+                        if (uid != null) {
+                            val db = com.google.firebase.firestore.FirebaseFirestore.getInstance()
+                            db.collection("users").document(uid).get()
+                                .addOnSuccessListener { document ->
+                                    if (document != null && document.exists()) {
+                                        val role = document.getString("role")
+
+                                        if (role == "admin") {
+                                            // Send admin to AdminActivity (you create this screen)
+                                            val intent = Intent(this, AdminFragment::class.java)
+                                            startActivity(intent)
+                                            finish()
+                                        } else {
+                                            // Default: normal users
+                                            val intent = Intent(this, MainActivity::class.java)
+                                            startActivity(intent)
+                                            finish()
+                                        }
+                                    } else {
+                                        Toast.makeText(this, "User data not found", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                                .addOnFailureListener { e ->
+                                    Toast.makeText(this, "Error fetching role: ${e.message}", Toast.LENGTH_SHORT).show()
+                                }
+                        }
                     } else {
-                        Toast.makeText(this, it.exception.toString(), Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, it.exception?.message, Toast.LENGTH_SHORT).show()
                     }
+
                 }
             } else {
                 Toast.makeText(this, "Fields cannot be empty", Toast.LENGTH_SHORT).show()

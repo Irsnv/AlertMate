@@ -55,7 +55,8 @@ class RegisterActivity : AppCompatActivity() {
                                     "fullname" to fullname,
                                     "email" to email,
                                     "phone" to phone,
-                                    "location" to location
+                                    "location" to location,
+                                    "role" to "user"
                                 )
 
                                 db.collection("users").document(uid).set(userMap)

@@ -1,0 +1,63 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:divider="?android:attr/dividerHorizontal"
+        android:showDividers="middle">
+
+        <!-- News Section -->
+        <TextView
+            android:text="Manage News"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:padding="8dp"/>
+        <Button
+            android:id="@+id/btnAddNews"
+            android:text="Add News"/>
+        <Button
+            android:id="@+id/btnEditNews"
+            android:text="Edit/Delete News"/>
+
+        <!-- Tips Section -->
+        <TextView
+            android:text="Manage Tips"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:padding="8dp"/>
+        <Button
+            android:id="@+id/btnAddTip"
+            android:text="Add Tip"/>
+        <Button
+            android:id="@+id/btnEditTip"
+            android:text="Edit/Delete Tip"/>
+
+        <!-- Emergency Numbers -->
+        <TextView
+            android:text="Manage Emergency Numbers"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:padding="8dp"/>
+        <Button
+            android:id="@+id/btnAddEmergency"
+            android:text="Add Emergency Number"/>
+        <Button
+            android:id="@+id/btnEditEmergency"
+            android:text="Edit/Delete Emergency Numbers"/>
+
+        <!-- Alerts -->
+        <TextView
+            android:text="Send Alerts"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:padding="8dp"/>
+        <Button
+            android:id="@+id/btnSendAlert"
+            android:text="Send New Alert"/>
+
+    </LinearLayout>
+</ScrollView>

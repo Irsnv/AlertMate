@@ -51,8 +51,21 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-// Import the Firebase BoM
+//import the firebase BoM
     implementation(platform("com.google.firebase:firebase-bom:34.3.0"))
     implementation ("com.google.firebase:firebase-auth")
     implementation ("com.google.firebase:firebase-firestore")
+//scalable size unit (support for diff screen size)
+    implementation("com.intuit.sdp:sdp-android:1.1.0")
+    implementation("com.intuit.ssp:ssp-android:1.1.0")
+//implementation koin (dependency injection)
+    implementation("io.insert-koin:koin-core:4.1.0")
+//retrofit framework for making HTTP requests.)
+    implementation("com.squareup.retrofit2:retrofit:2.11.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.11.0")
+//view model
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
+//coil (image loading library)
+    implementation("io.coil-kt:coil:2.5.0")
+
 }
