@@ -63,9 +63,13 @@ dependencies {
 //retrofit framework for making HTTP requests.)
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
     implementation("com.squareup.retrofit2:converter-gson:2.11.0")
-//view model
+//view model (helps store and manage UI related data)
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
 //coil (image loading library)
     implementation("io.coil-kt:coil:2.5.0")
+//swipe refresh layout
+    implementation ("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
+//asynchronous programming (can fetch data without freeze the UI)
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
 
 }
