@@ -1,59 +1,101 @@
-package com.example.alertmate
+package com.example.alertmate.profile
 
+import android.content.Intent
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
+import android.widget.Toast
+import androidx.fragment.app.Fragment
+import com.example.alertmate.LoginActivity
+import com.example.alertmate.R
+import com.example.alertmate.databinding.FragmentProfileBinding
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [ProfileFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class ProfileFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
-    }
+    private var _binding: FragmentProfileBinding? = null
+    private val binding get() = _binding!!
+
+    private lateinit var firebaseAuth: FirebaseAuth
+    private lateinit var db: FirebaseFirestore
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_profile, container, false)
+    ): View {
+        _binding = FragmentProfileBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment ProfileFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            ProfileFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        firebaseAuth = FirebaseAuth.getInstance()
+        db = FirebaseFirestore.getInstance()
+
+        val user = firebaseAuth.currentUser ?: return
+
+        // Spinner options
+        val locations = arrayOf("Klang", "Shah Alam")
+        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, locations)
+        binding.profileLocation.adapter = adapter
+
+        // Fetch user data
+        db.collection("users").document(user.uid).get()
+            .addOnSuccessListener { document ->
+                if (document != null) {
+                    binding.profileFullname.setText(document.getString("fullname"))
+                    binding.profileEmail.setText(document.getString("email"))
+                    binding.profilePhone.setText(document.getString("phone"))
+                    val location = document.getString("location")
+                    val position = locations.indexOf(location)
+                    if (position >= 0) binding.profileLocation.setSelection(position)
                 }
             }
+            .addOnFailureListener {
+                Toast.makeText(requireContext(), "Failed to load profile", Toast.LENGTH_SHORT).show()
+            }
+
+        // Update profile
+        binding.btnUpdateProfile.setOnClickListener {
+            val fullname = binding.profileFullname.text.toString().trim()
+            val phone = binding.profilePhone.text.toString().trim()
+            val location = binding.profileLocation.selectedItem.toString()
+
+            if (fullname.isEmpty() || phone.isEmpty()) {
+                Toast.makeText(requireContext(), "All fields must be filled", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            val updatedData = hashMapOf(
+                "fullname" to fullname,
+                "phone" to phone,
+                "location" to location
+            )
+
+            db.collection("users").document(user.uid).update(updatedData as Map<String, Any>)
+                .addOnSuccessListener {
+                    Toast.makeText(requireContext(), "Profile updated", Toast.LENGTH_SHORT).show()
+                }
+                .addOnFailureListener { e ->
+                    Toast.makeText(requireContext(), "Update failed: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+        }
+
+        // Logout
+        binding.btnLogout.setOnClickListener {
+            firebaseAuth.signOut()
+            val intent = Intent(requireContext(), LoginActivity::class.java)
+            startActivity(intent)
+            activity?.finish()
+        }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

@@ -29,19 +29,19 @@
                     android:orientation="horizontal">
 
                     <TextView
-                        android:id="@+id/text_state"
+                        android:id="@+id/tvState"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_margin="24dp"
-                        android:text="Klang"
-                        android:textSize="50sp"
+                        android:text="Shah Alam"
+                        android:textSize="30sp"
                         android:textStyle="bold"
                         android:textColor="@color/white"/>
 
                     <TextView
+                        android:id="@+id/tvTemperature"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:id="@+id/text_temperature"
                         android:text="25°C"
                         android:textSize="50sp"
                         android:textStyle="bold"
@@ -65,9 +65,9 @@
                     android:layout_height="match_parent">
 
                     <ImageView
+                        android:id="@+id/imgView"
                         android:layout_width="170dp"
                         android:layout_height="170dp"
-                        android:id="@+id/imgView"
                         android:src="@drawable/sunny"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
@@ -92,13 +92,13 @@
                             <TextView
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:text="Wind speed"
+                                android:text="Wind"
                                 android:textSize="13sp"
                                 android:textColor="@color/white"/>
                             <TextView
+                                android:id="@+id/tvWindSpeed"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:id="@+id/wtextViw2"
                                 android:text="12km/h"
                                 android:textSize="18sp"
                                 android:textColor="@color/white"
@@ -118,6 +118,7 @@
                                 android:textSize="13sp"
                                 android:textColor="@color/white"/>
                             <TextView
+                                android:id="@+id/tvHumidity"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:text="18%"
@@ -135,13 +136,14 @@
                             <TextView
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:text="Rain"
+                                android:text="Chance of rain"
                                 android:textSize="13sp"
                                 android:textColor="@color/white"/>
                             <TextView
+                                android:id="@+id/tvChaOfRain"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:text="12km/h"
+                                android:text="86%"
                                 android:textSize="18sp"
                                 android:textColor="@color/white"
                                 android:textStyle="bold"/>

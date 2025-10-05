@@ -4,6 +4,7 @@
     <string name="success_desc">Congratulation your account has been successfully created.</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="rain">Rain</string>
 
     <string-array name="loc_array">
         <item>Klang</item>
