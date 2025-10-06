@@ -6,7 +6,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
 import coil.load
+import com.example.alertmate.R
 import com.example.alertmate.databinding.FragmentHomeBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -19,7 +21,6 @@ class HomeFragment : Fragment() {
 
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
-
     private val db = FirebaseFirestore.getInstance()
     private val apiKey = "8ae14fb0f147ecae151f258a8bfc482f"
 
@@ -43,12 +44,14 @@ class HomeFragment : Fragment() {
         // Fetch weather on load
         fetchUserLocation(userId) { lat, lon ->
             fetchWeather(lat, lon)
+            fetchHourlyForecast(lat, lon)
         }
 
         // Swipe to refresh
         binding.swipeRefreshLayout.setOnRefreshListener {
             fetchUserLocation(userId) { lat, lon ->
                 fetchWeather(lat, lon)
+                fetchHourlyForecast(lat, lon)
             }
         }
     }
@@ -80,12 +83,12 @@ class HomeFragment : Fragment() {
                     when (location) {
                         "Klang" -> onResult(3.0392, 101.4419)
                         "Shah Alam" -> onResult(3.0734, 101.5217)
-                        else -> onResult(3.0734, 101.5217) // default
+                        else -> onResult(3.0734, 101.5217)
                     }
                 }
             }
             .addOnFailureListener {
-                onResult(3.0734, 101.5217) // default if error
+                onResult(3.0734, 101.5217)
             }
     }
 
@@ -104,10 +107,22 @@ class HomeFragment : Fragment() {
                     binding.tvHumidity.text = "${weather.main.humidity}%"
                     binding.tvWindSpeed.text = "${weather.wind.speed} m/s"
 
-                    // Load weather icon
-                    val iconUrl =
-                        "https://openweathermap.org/img/wn/${weather.weather[0].icon}@2x.png"
-                    binding.imgView.load(iconUrl)
+                    // Chance of Rain (replace with weather)
+                    val weatherMain = weather.weather[0].main
+                    binding.tvChaOfRain.text = when (weatherMain) {
+                        "Rain" -> "High"
+                        "Drizzle" -> "Medium"
+                        "Thunderstorm" -> "Very High"
+                        else -> "0%"
+                    }
+
+                    // Load weather icon with placeholder/error
+                    val iconUrl = "https://openweathermap.org/img/wn/${weather.weather[0].icon}@2x.png"
+                    binding.imgView.load(iconUrl) {
+                        crossfade(true)
+                        placeholder(R.drawable.sunny)
+                        error(R.drawable.sunny)
+                    }
                 }
             } catch (e: HttpException) {
                 e.printStackTrace()
@@ -115,6 +130,29 @@ class HomeFragment : Fragment() {
                 e.printStackTrace()
             } finally {
                 hideLoading()
+            }
+        }
+    }
+
+    private fun fetchHourlyForecast(lat: Double, lon: Double) {
+        lifecycleScope.launch {
+            try {
+                val response = RetrofitInstance.api.getHourlyWeather(lat, lon, apiKey)
+                if (response.isSuccessful) {
+                    val data = response.body()
+                    data?.let {
+                        binding.hourlyRecyclerView.apply {
+                            layoutManager = LinearLayoutManager(
+                                requireContext(),
+                                LinearLayoutManager.HORIZONTAL,
+                                false
+                            )
+                            adapter = HourlyAdapter(it.list)
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
     }

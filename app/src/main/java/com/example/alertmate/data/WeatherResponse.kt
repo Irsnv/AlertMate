@@ -1,5 +1,6 @@
 package com.example.alertmate.data
 
+//current weather
 data class WeatherResponse(
     val weather: List<Weather>,
     val main: Main,

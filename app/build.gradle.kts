@@ -71,5 +71,6 @@ dependencies {
     implementation ("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
 //asynchronous programming (can fetch data without freeze the UI)
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
-
+//more like advanced version of ListView
+    implementation("androidx.recyclerview:recyclerview:1.3.0")
 }
