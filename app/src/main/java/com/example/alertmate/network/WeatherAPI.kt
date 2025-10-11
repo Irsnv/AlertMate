@@ -1,26 +1,19 @@
-import com.example.alertmate.data.HourlyWeatherResponse
-import com.example.alertmate.data.WeatherResponse
+import com.example.alertmate.data.OneCallResponse
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Query
 
 //current weather
-interface WeatherAPI {
-    @GET("weather")
-    suspend fun getCurrentWeather(
+interface OneCallApi {
+    @GET("onecall")
+    suspend fun getOneCall(
         @Query("lat") lat: Double,
         @Query("lon") lon: Double,
-        @Query("appid") apiKey: String,
-        @Query("units") units: String = "metric"
-    ): Response<WeatherResponse>
-
-    @GET("forecast") // use "forecast" for 3-hour intervals (free API) OR "forecast/hourly" for Pro API
-    suspend fun getHourlyWeather(
-        @Query("lat") lat: Double,
-        @Query("lon") lon: Double,
-        @Query("appid") appid: String,
-        @Query("units") units: String = "metric"
-    ): Response<HourlyWeatherResponse>
+        @Query("exclude") exclude: String? = null,   // e.g. "minutely,alerts"
+        @Query("units") units: String = "metric",
+        @Query("lang") lang: String = "en",
+        @Query("appid") apiKey: String
+    ): Response<OneCallResponse>
 }
 
 

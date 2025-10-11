@@ -24,6 +24,9 @@ class HomeFragment : Fragment() {
     private val db = FirebaseFirestore.getInstance()
     private val apiKey = "8ae14fb0f147ecae151f258a8bfc482f"
 
+    private val hourlyAdapter = HourlyAdapter(emptyList())
+    private lateinit var dailyAdapter: DailyAdapter
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -35,6 +38,16 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // RecyclerView setup - do once
+        binding.hourlyRecyclerView.apply {
+            layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+            setHasFixedSize(true)
+            adapter = hourlyAdapter
+        }
+
+        binding.dailyRecyclerView.layoutManager =
+            LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+
         // Set current date
         binding.textCurrentDate.text = getCurrentDate()
 
@@ -42,16 +55,14 @@ class HomeFragment : Fragment() {
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
 
         // Fetch weather on load
-        fetchUserLocation(userId) { lat, lon ->
-            fetchWeather(lat, lon)
-            fetchHourlyForecast(lat, lon)
+        fetchUserLocation(userId) { lat, lon, cityName ->
+            fetchWeatherData(lat, lon, cityName)
         }
 
         // Swipe to refresh
         binding.swipeRefreshLayout.setOnRefreshListener {
-            fetchUserLocation(userId) { lat, lon ->
-                fetchWeather(lat, lon)
-                fetchHourlyForecast(lat, lon)
+            fetchUserLocation(userId) { lat, lon, cityName ->
+                fetchWeatherData(lat, lon, cityName)
             }
         }
     }
@@ -75,57 +86,109 @@ class HomeFragment : Fragment() {
     }
 
     // Fetch user location from Firestore
-    private fun fetchUserLocation(userId: String, onResult: (Double, Double) -> Unit) {
+    private fun fetchUserLocation(userId: String, onResult: (Double, Double, String) -> Unit) {
         db.collection("users").document(userId).get()
             .addOnSuccessListener { document ->
                 if (document.exists()) {
                     val location = document.getString("location")
                     when (location) {
-                        "Klang" -> onResult(3.0392, 101.4419)
-                        "Shah Alam" -> onResult(3.0734, 101.5217)
-                        else -> onResult(3.0734, 101.5217)
+                        "Klang" -> onResult(3.0392, 101.4419, "Klang")
+                        "Shah Alam" -> onResult(3.0734, 101.5217, "Shah Alam")
+                        else -> onResult(3.0734, 101.5217, "Shah Alam")
                     }
                 }
             }
             .addOnFailureListener {
-                onResult(3.0734, 101.5217)
+                onResult(3.0734, 101.5217, "Shah Alam")
             }
     }
 
     // Fetch weather from OpenWeatherMap
-    private fun fetchWeather(lat: Double, lon: Double) {
+    private fun fetchWeatherData(lat: Double, lon: Double, cityName: String) {
         showLoading()
         lifecycleScope.launch {
             try {
-                val response = RetrofitInstance.api.getCurrentWeather(lat, lon, apiKey)
+                // Call One Call API
+                val response = RetrofitInstance.api.getOneCall(
+                    lat = lat,
+                    lon = lon,
+                    exclude = "minutely,alerts",
+                    units = "metric",
+                    apiKey = apiKey
+                )
+
                 if (response.isSuccessful && response.body() != null) {
-                    val weather = response.body()!!
+                    val data = response.body()!!
 
-                    // Update UI
-                    binding.tvState.text = weather.name
-                    binding.tvTemperature.text = "${weather.main.temp.toInt()}°C"
-                    binding.tvHumidity.text = "${weather.main.humidity}%"
-                    binding.tvWindSpeed.text = "${weather.wind.speed} m/s"
+                    // ====== CURRENT ======
+                    val current = data.current
+                    binding.tvTemperature.text = "${current?.temp?.toInt()}°C"
+                    binding.tvHumidity.text = "${current?.humidity ?: 0}%"
+                    binding.tvWindSpeed.text = "${current?.wind_speed ?: 0.0} m/s"
+                    binding.tvState.text = data.timezone ?: "Unknown"
 
-                    // Chance of Rain (replace with weather)
-                    val weatherMain = weather.weather[0].main
-                    binding.tvChaOfRain.text = when (weatherMain) {
-                        "Rain" -> "High"
-                        "Drizzle" -> "Medium"
-                        "Thunderstorm" -> "Very High"
-                        else -> "0%"
-                    }
+                    binding.tvState.text = cityName
 
-                    // Load weather icon with placeholder/error
-                    val iconUrl = "https://openweathermap.org/img/wn/${weather.weather[0].icon}@2x.png"
-                    binding.imgView.load(iconUrl) {
+                    // Chance of Rain
+                    val chanceOfRain = (data.hourly?.get(0)?.pop ?: 0.0) * 100
+                    binding.tvChaOfRain.text = "${chanceOfRain.toInt()}%"
+
+                    // Weather Icon
+                    val icon = current?.weather?.get(0)?.icon ?: "01d"
+                    binding.imgView.load("https://openweathermap.org/img/wn/${icon}@2x.png") {
                         crossfade(true)
                         placeholder(R.drawable.sunny)
                         error(R.drawable.sunny)
                     }
+
+                    // ====== HOURLY ======
+                    val hourlyListFromApi = data.hourly ?: emptyList()
+
+                    // Choose how many hours to show:
+                    // - For hourly: next 24 hours is typical (OneCall returns up to 48)
+                    val hoursToShow = 24
+                    val displayHourly = if (hourlyListFromApi.size > hoursToShow)
+                        hourlyListFromApi.take(hoursToShow)
+                    else
+                        hourlyListFromApi
+
+                    // Update adapter (no re-creation)
+                    hourlyAdapter.updateList(displayHourly)
+
+                    // If there are no hourly items, optionally hide the RecyclerView
+                    if (displayHourly.isEmpty()) {
+                        binding.hourlyRecyclerView.visibility = View.GONE
+                    } else {
+                        binding.hourlyRecyclerView.visibility = View.VISIBLE
+                    }
+
+
+                    // ====== DAILY ======
+                    val dailyListFromApi = data.daily ?: emptyList()
+
+                    // Choose how many days to show (e.g., 7 days)
+                    val daysToShow = 7
+                    val displayDaily = if (dailyListFromApi.size > daysToShow)
+                        dailyListFromApi.take(daysToShow)
+                    else
+                        dailyListFromApi
+
+                    // If you haven't created adapter earlier, initialize it once
+                    if (!::dailyAdapter.isInitialized) {
+                        dailyAdapter = DailyAdapter(displayDaily)
+                        binding.dailyRecyclerView.adapter = dailyAdapter
+                        binding.dailyRecyclerView.layoutManager =
+                            LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
+                    } else {
+                        dailyAdapter.updateList(displayDaily)
+                    }
+
+                    // Hide RecyclerView if list is empty
+                    binding.dailyRecyclerView.visibility =
+                        if (displayDaily.isEmpty()) View.GONE else View.VISIBLE
+
                 }
-            } catch (e: HttpException) {
-                e.printStackTrace()
+
             } catch (e: Exception) {
                 e.printStackTrace()
             } finally {
@@ -134,28 +197,6 @@ class HomeFragment : Fragment() {
         }
     }
 
-    private fun fetchHourlyForecast(lat: Double, lon: Double) {
-        lifecycleScope.launch {
-            try {
-                val response = RetrofitInstance.api.getHourlyWeather(lat, lon, apiKey)
-                if (response.isSuccessful) {
-                    val data = response.body()
-                    data?.let {
-                        binding.hourlyRecyclerView.apply {
-                            layoutManager = LinearLayoutManager(
-                                requireContext(),
-                                LinearLayoutManager.HORIZONTAL,
-                                false
-                            )
-                            adapter = HourlyAdapter(it.list)
-                        }
-                    }
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-    }
 
     override fun onDestroyView() {
         super.onDestroyView()
