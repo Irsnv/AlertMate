@@ -17,7 +17,7 @@ import kotlin.math.roundToInt
 
 class DailyAdapter(
     private var items: List<DailyItem> = listOf(),
-    private val timezoneId: String = "Asia/Kuala_Lumpur" // set to user's timezone if needed
+    private val timezoneId: String = ""
 ) : RecyclerView.Adapter<DailyAdapter.DailyVH>() {
 
     inner class DailyVH(view: View) : RecyclerView.ViewHolder(view) {
