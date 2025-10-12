@@ -9,7 +9,7 @@ interface OneCallApi {
     suspend fun getOneCall(
         @Query("lat") lat: Double,
         @Query("lon") lon: Double,
-        @Query("exclude") exclude: String? = null,   // e.g. "minutely,alerts"
+        @Query("exclude") exclude: String? = null,
         @Query("units") units: String = "metric",
         @Query("lang") lang: String = "en",
         @Query("appid") apiKey: String
