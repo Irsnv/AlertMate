@@ -57,16 +57,12 @@ class DailyAdapter(
             else -> "--°"
         }
 
-        // --- Icon ---
+        // --- Icon (Fixed with IconReplace) ---
+        val main = daily.weather?.firstOrNull()?.main
+        val desc = daily.weather?.firstOrNull()?.description
         val iconCode = daily.weather?.firstOrNull()?.icon
-        if (!iconCode.isNullOrEmpty()) {
-            holder.ivIcon.load("https://openweathermap.org/img/wn/${iconCode}@2x.png") {
-                placeholder(R.drawable.windy)
-                error(R.drawable.windy)
-            }
-        } else {
-            holder.ivIcon.setImageResource(R.drawable.windy)
-        }
+        val (label, iconRes) = IconReplace.resolve(daily.temp?.day, main, desc, iconCode)
+        holder.ivIcon.setImageResource(iconRes)
     }
 
     override fun getItemCount(): Int = items.size

@@ -1,27 +1,21 @@
 package com.example.alertmate.home
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import coil.load
 import com.example.alertmate.R
 import com.example.alertmate.data.HourlyItem
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.roundToInt
 
-class HourlyAdapter(private var list: List<HourlyItem>) :
-    RecyclerView.Adapter<HourlyAdapter.HourlyViewHolder>() {
-
-    // Public helper to update the adapter's data without recreating the adapter
-    fun updateList(newList: List<HourlyItem>) {
-        list = newList
-        notifyDataSetChanged()
-    }
+class HourlyAdapter(
+    private var list: List<HourlyItem>,
+    private var selectedIndex: Int = -1
+) : RecyclerView.Adapter<HourlyAdapter.HourlyViewHolder>() {
 
     class HourlyViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val hourTxt: TextView = view.findViewById(R.id.hourTxt)
@@ -39,38 +33,46 @@ class HourlyAdapter(private var list: List<HourlyItem>) :
     override fun onBindViewHolder(holder: HourlyViewHolder, position: Int) {
         val item = list[position]
 
-        // 1) Time formatting (Unix seconds -> readable hour)
+        // Time: format dt -> "1 PM"
         val ts = (item.dt ?: 0L) * 1000L
         val date = Date(ts)
-        val sdf = SimpleDateFormat("h a", Locale.getDefault()) // e.g. "1 PM"
+        val sdf = SimpleDateFormat("h a", Locale.getDefault())
         holder.hourTxt.text = sdf.format(date)
 
-        // 2) Temperature (safe, rounded)
+        // Temperature (units=metric assumed)
         val tempText = item.temp?.roundToInt()?.let { "$it°C" } ?: "--"
         holder.tempTxt.text = tempText
 
-        // 3) Description (safe)
+        val main = item.weather?.firstOrNull()?.main
         val desc = item.weather?.firstOrNull()?.description
-            ?.replaceFirstChar { it.uppercaseChar() } ?: ""
-        holder.tempdescTxt.text = desc
+        val iconCode = item.weather?.firstOrNull()?.icon
+        val tempValue = item.temp
 
-        Log.d("HourlyDebug", "Hour: ${item.dt}, Icon: ${item.weather?.firstOrNull()?.icon}")
-
-        // 4) Icon (safe). If icon is null, fall back to "01d"
-        val icon = item.weather?.firstOrNull()?.icon ?: "01d"
-        val iconUrl = "https://openweathermap.org/img/wn/${icon}@2x.png"
-
-        // inside onBindViewHolder (example)
-        val popPercent = ((item.pop ?: 0.0) * 100).roundToInt()
-        holder.tempdescTxt.text = "$popPercent% rain"
+        // Use combined resolver (temperature-aware)
+        val (label, resId) = IconReplace.resolve(tempValue, main, desc, iconCode)
+        holder.tempdescTxt.text = label
+        holder.pic.setImageResource(resId)
 
 
-        holder.pic.load(iconUrl) {
-            crossfade(true)
-            placeholder(R.drawable.cloudy) // use a drawable in your project
-            error(R.drawable.cloudy)
+        // Highlight selected hour (optional visual)
+        holder.itemView.isSelected = (position == selectedIndex)
+
+        // On click, mark selected and notify (keeps local selection UI)
+        holder.itemView.setOnClickListener {
+            val old = selectedIndex
+            selectedIndex = position
+            notifyItemChanged(old)
+            notifyItemChanged(selectedIndex)
+            // Optionally: you can add callback to notify fragment of this click
         }
     }
 
     override fun getItemCount(): Int = list.size
+
+    // Replace adapter data and optionally pre-select an index
+    fun updateList(newList: List<HourlyItem>, selectIndex: Int = -1) {
+        list = newList
+        selectedIndex = selectIndex
+        notifyDataSetChanged() // ok for small lists; use DiffUtil for better perf
+    }
 }

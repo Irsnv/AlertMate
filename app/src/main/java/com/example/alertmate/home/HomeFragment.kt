@@ -16,6 +16,7 @@ import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.math.roundToInt
 
 class HomeFragment : Fragment() {
 
@@ -144,23 +145,63 @@ class HomeFragment : Fragment() {
                     // ====== HOURLY ======
                     val hourlyListFromApi = data.hourly ?: emptyList()
 
-                    // Choose how many hours to show:
-                    // - For hourly: next 24 hours is typical (OneCall returns up to 48)
+// Choose how many hours to show (next 24 hours typical)
                     val hoursToShow = 24
                     val displayHourly = if (hourlyListFromApi.size > hoursToShow)
                         hourlyListFromApi.take(hoursToShow)
                     else
                         hourlyListFromApi
 
-                    // Update adapter (no re-creation)
-                    hourlyAdapter.updateList(displayHourly)
+                    // --- find index for current hour (first dt >= now)
+                    fun findCurrentHourIndex(hourly: List<com.example.alertmate.data.HourlyItem>): Int {
+                        val nowSec = System.currentTimeMillis() / 1000
+                        val idx = hourly.indexOfFirst { (it.dt ?: 0L) >= nowSec }
+                        return if (idx == -1) {
+                            // fallback: if all dt < now (unlikely), choose last item
+                            maxOf(0, hourly.size - 1)
+                        } else idx
+                    }
 
-                    // If there are no hourly items, optionally hide the RecyclerView
                     if (displayHourly.isEmpty()) {
                         binding.hourlyRecyclerView.visibility = View.GONE
                     } else {
                         binding.hourlyRecyclerView.visibility = View.VISIBLE
+                        // update adapter with list and selected index
+                        val selectIndex = findCurrentHourIndex(displayHourly)
+                        hourlyAdapter.updateList(displayHourly, selectIndex)
+
+                        // Scroll so selected item is visible and slightly offset (center-ish)
+                        binding.hourlyRecyclerView.post {
+                            val lm = binding.hourlyRecyclerView.layoutManager as? LinearLayoutManager
+                            if (lm != null) {
+                                // compute center offset: center the selected item approximately
+                                val recyclerWidth = binding.hourlyRecyclerView.width
+                                val itemWidthDp = 130  // your item layout width in dp (you used 130dp)
+                                val density = resources.displayMetrics.density
+                                val itemWidthPx = (itemWidthDp * density).toInt()
+                                val offset = (recyclerWidth / 2) - (itemWidthPx / 2)
+                                lm.scrollToPositionWithOffset(selectIndex, offset)
+                            } else {
+                                binding.hourlyRecyclerView.scrollToPosition(selectIndex)
+                            }
+                        }
+
+                        // Update top Today UI with the selected hour (or `current` if you want)
+                        val topItem = displayHourly.getOrNull(selectIndex)
+                        topItem?.let { item ->
+                            // set big temperature
+                            binding.tvTemperature.text = "${item.temp?.roundToInt() ?: 0}°C"
+
+                            // set description label
+                            val main = item.weather?.firstOrNull()?.main
+                            val desc = item.weather?.firstOrNull()?.description
+                            val (label, iconRes) = IconReplace.resolve(item.temp, main, desc, item.weather?.firstOrNull()?.icon)
+                            binding.tvChaOfRain.text = label
+                            binding.imgView.setImageResource(iconRes)
+
+                        }
                     }
+
 
 
                     // ====== DAILY ======
