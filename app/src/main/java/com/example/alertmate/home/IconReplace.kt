@@ -5,10 +5,6 @@ import java.util.*
 
 object IconReplace {
 
-    /**
-     * Map temperature range (°C) to local weather label and icon.
-     * Used for Malaysian context — no snow.
-     */
     fun mapTempToLabelAndDrawable(temp: Double?): Pair<String, Int> {
         if (temp == null) return "Unknown" to R.drawable.unknown
 
@@ -21,9 +17,6 @@ object IconReplace {
         }
     }
 
-    /**
-     * Map icon code to drawable (backup when temperature not available).
-     */
     fun mapIconCodeToDrawable(iconCode: String?): Int {
         if (iconCode.isNullOrBlank()) return R.drawable.unknown
         return when {
@@ -38,9 +31,6 @@ object IconReplace {
         }
     }
 
-    /**
-     * Combined mapping: use temperature first, else use weather.main/icon.
-     */
     fun resolve(temp: Double?, main: String?, description: String?, iconCode: String?): Pair<String, Int> {
         // Prefer temperature logic if valid
         val (label, iconRes) = mapTempToLabelAndDrawable(temp)
