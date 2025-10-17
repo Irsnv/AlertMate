@@ -1,73 +1,135 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:orientation="vertical">
 
-    <!-- Emergency Tips Scrollable Section -->
-    <ScrollView
-        android:id="@+id/scrollTips"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:background="@drawable/ceruleanblue_border"
-        android:padding="16dp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/buttonContact"
-        android:fillViewport="true">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:spacing="12dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="horizontal"
+            android:weightSum="2">
 
-            <TextView
-                android:id="@+id/tvTipsTitle"
-                android:layout_width="wrap_content"
+            <Button
+                android:id="@+id/btnTips"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="Flash Flood Emergency Tips"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:paddingBottom="8dp"/>
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/rounded_button"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:text="Guide"
+                android:textSize="16sp"
+                android:drawablePadding="8dp" />
 
-            <!-- Example Tips -->
-            <TextView
-                android:id="@+id/tvTip1"
-                android:layout_width="wrap_content"
+            <Button
+                android:id="@+id/btnEmeCont"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="1. Move to higher ground immediately."
-                android:paddingBottom="4dp"/>
-
-            <TextView
-                android:id="@+id/tvTip2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="2. Avoid walking or driving through flood water."
-                android:paddingBottom="4dp"/>
-
-            <TextView
-                android:id="@+id/tvTip3"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="3. Keep emergency supplies ready."
-                android:paddingBottom="4dp"/>
-
-            <!-- Add more tips dynamically later -->
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/rounded_button"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:text="Emergency Contact"
+                android:textSize="16sp"/>
         </LinearLayout>
-    </ScrollView>
 
-    <!-- Button to go to Emergency Contact Fragment -->
-    <Button
-        android:id="@+id/buttonContact"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Emergency Contacts"
-        android:backgroundTint="@color/design_default_color_primary"
-        android:textColor="@android:color/white"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        <ScrollView
+            android:id="@+id/layoutTips"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/ceruleanblue_border"
+            android:padding="16dp"
+            android:layout_marginTop="20dp"
+            android:visibility="visible">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Flash Flood Emergency Tips"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:paddingBottom="8dp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="1. Move to higher ground immediately."
+                    android:paddingBottom="4dp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="2. Avoid walking or driving through flood water."
+                    android:paddingBottom="4dp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="3. Keep emergency supplies ready."
+                    android:paddingBottom="4dp"/>
+
+            </LinearLayout>
+        </ScrollView>
+
+        <ScrollView
+            android:id="@+id/layoutEmergency"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/ceruleanblue_border"
+            android:padding="16dp"
+            android:layout_marginTop="20dp"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Emergency Contact Numbers"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:paddingBottom="8dp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="• Fire and Rescue: 999"
+                    android:paddingBottom="4dp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="• Police: 999"
+                    android:paddingBottom="4dp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="• Civil Defence (JPAM): 991"
+                    android:paddingBottom="4dp"/>
+
+            </LinearLayout>
+        </ScrollView>
+    </LinearLayout>
+</LinearLayout>
