@@ -6,5 +6,7 @@
     <color name="ceruleanblue">#0492C2</color>
     <color name="lightblue">#90e0ef</color>
     <color name="navy">#03045e</color>
+    <color name="grey">#7d7d7d</color>
+
 
 </resources>

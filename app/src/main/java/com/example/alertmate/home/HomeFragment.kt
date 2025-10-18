@@ -202,8 +202,6 @@ class HomeFragment : Fragment() {
                         }
                     }
 
-
-
                     // ====== DAILY ======
                     val dailyListFromApi = data.daily ?: emptyList()
 
