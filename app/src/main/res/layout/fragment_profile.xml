@@ -127,5 +127,17 @@
             android:layout_marginTop="16dp"
             android:background="@drawable/login_btn" />
 
+        <Button
+            android:id="@+id/btnTestAlert"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Test Alert"
+            android:textColor="@android:color/white"
+            android:layout_marginHorizontal="32dp"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/login_btn" />
+
+
     </LinearLayout>
+
 </ScrollView>

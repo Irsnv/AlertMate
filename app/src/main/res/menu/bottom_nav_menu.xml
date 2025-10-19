@@ -15,11 +15,11 @@
         android:id="@+id/bott_home"
         android:title="Home"
         android:icon="@drawable/home"/>
-
+    <!--
     <item
         android:id="@+id/bott_alert"
         android:title="Alert"
-        android:icon="@drawable/notification"/>
+        android:icon="@drawable/notification"/>-->
 
     <item
         android:id="@+id/bott_tips"

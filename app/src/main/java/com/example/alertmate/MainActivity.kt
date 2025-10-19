@@ -1,8 +1,12 @@
 package com.example.alertmate
 
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.example.alertmate.home.HomeFragment
 import com.example.alertmate.profile.ProfileFragment
@@ -27,13 +31,25 @@ class MainActivity : AppCompatActivity() {
             when (item.itemId) {
                 R.id.bott_home -> loadFragment(HomeFragment())
                 R.id.bott_tips -> loadFragment(TipsFragment())
-                R.id.bott_alert -> loadFragment(AlertFragment())
+                //R.id.bott_alert -> loadFragment(AlertFragment())
                 R.id.bott_profile -> loadFragment(ProfileFragment())
                 R.id.bott_news -> loadFragment(NewsFragment())
                 else -> false
             }
             true
         }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS)
+                != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(android.Manifest.permission.POST_NOTIFICATIONS),
+                    1001
+                )
+            }
+        }
+
     }
 
     // helper function to replace fragments

@@ -1,5 +1,8 @@
 package com.example.alertmate.home
 
+import android.app.AlarmManager
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,6 +12,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import coil.load
 import com.example.alertmate.R
+import com.example.alertmate.alert.AlertActivity
+import com.example.alertmate.alert.AlertReceiver
 import com.example.alertmate.databinding.FragmentHomeBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -226,6 +231,25 @@ class HomeFragment : Fragment() {
                     binding.dailyRecyclerView.visibility =
                         if (displayDaily.isEmpty()) View.GONE else View.VISIBLE
 
+                    // === Detect thunderstorm 1 hour ahead ===
+                    val nowSec = System.currentTimeMillis() / 1000
+                    val oneHourAhead = nowSec + 3600
+
+                    val upcomingThunderstorm = displayHourly.firstOrNull { hour ->
+                        val dt = hour.dt ?: 0L
+                        val main = hour.weather?.firstOrNull()?.main ?: ""
+                        dt in nowSec..oneHourAhead && main.contains("Thunderstorm", ignoreCase = true)
+                    }
+
+                    // Use .let for safe handling of the nullable upcomingThunderstorm
+                    upcomingThunderstorm?.let {
+                        // This code only runs if 'it' (the thunderstorm) is not null
+                        val stormTime = it.dt ?: return@let // Use return@let to exit only the 'let' block
+                        val triggerTime = (stormTime - 3600) * 1000L // 1 hour before (in ms)
+                        scheduleAlert(triggerTime)
+                    }
+
+
                 }
 
             } catch (e: Exception) {
@@ -234,6 +258,23 @@ class HomeFragment : Fragment() {
                 hideLoading()
             }
         }
+    }
+    private fun scheduleAlert(triggerAtMillis: Long) {
+        val context = requireContext().applicationContext
+        val intent = Intent(context, AlertReceiver::class.java)
+        val pendingIntent = android.app.PendingIntent.getBroadcast(
+            context,
+            0,
+            intent,
+            android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val alarmManager = requireContext().getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        alarmManager.setExact(
+            AlarmManager.RTC_WAKEUP,
+            System.currentTimeMillis() + 10000,  // 10 seconds later
+            pendingIntent
+        )
     }
 
 

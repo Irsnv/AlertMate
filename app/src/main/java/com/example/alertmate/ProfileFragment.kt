@@ -1,5 +1,7 @@
 package com.example.alertmate.profile
 
+import android.app.AlarmManager
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -10,6 +12,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.example.alertmate.LoginActivity
 import com.example.alertmate.R
+import com.example.alertmate.alert.AlertReceiver
 import com.example.alertmate.databinding.FragmentProfileBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -92,7 +95,34 @@ class ProfileFragment : Fragment() {
             startActivity(intent)
             activity?.finish()
         }
+        // testalert
+        binding.btnTestAlert.setOnClickListener {
+            val context = requireContext().applicationContext
+            val intent = Intent(context, AlertReceiver::class.java)
+            context.sendBroadcast(intent)  // simpler, triggers immediately
+        }
+
     }
+
+    private fun triggerTestAlert() {
+        val context = requireContext().applicationContext
+        val intent = Intent(context, AlertReceiver::class.java)
+        val pendingIntent = android.app.PendingIntent.getBroadcast(
+            context,
+            0,
+            intent,
+            android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        // Trigger after 1 second for demo
+        alarmManager.setExact(
+            AlarmManager.RTC_WAKEUP,
+            System.currentTimeMillis() + 1000,
+            pendingIntent
+        )
+    }
+
 
     override fun onDestroyView() {
         super.onDestroyView()
