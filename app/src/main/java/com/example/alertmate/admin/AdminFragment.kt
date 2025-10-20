@@ -13,9 +13,16 @@ import com.google.firebase.firestore.FieldValue
 class AdminFragment : Fragment() {
 
     private lateinit var db: FirebaseFirestore
+
+    // Tips buttons
     private lateinit var btnAdd: Button
     private lateinit var btnEdit: Button
     private lateinit var btnDelete: Button
+
+    // Emergency Contact buttons
+    private lateinit var btnAddEC: Button
+    private lateinit var btnEditEC: Button
+    private lateinit var btnDelEC: Button
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -28,6 +35,7 @@ class AdminFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         db = FirebaseFirestore.getInstance()
 
+        // Initialize Tips buttons
         btnAdd = view.findViewById(R.id.btnAddTips)
         btnEdit = view.findViewById(R.id.btnEditTips)
         btnDelete = view.findViewById(R.id.btnDelTips)
@@ -35,7 +43,17 @@ class AdminFragment : Fragment() {
         btnAdd.setOnClickListener { showAddDialog() }
         btnEdit.setOnClickListener { showEditDialog() }
         btnDelete.setOnClickListener { showDeleteDialog() }
+
+        // Initialize Emergency Contact buttons
+        btnAddEC = view.findViewById(R.id.btnAddEC)
+        btnEditEC = view.findViewById(R.id.btnEditEC)
+        btnDelEC = view.findViewById(R.id.btnDelEC)
+
+        btnAddEC.setOnClickListener { showAddECDialog() }
+        btnEditEC.setOnClickListener { showEditECDialog() }
+        btnDelEC.setOnClickListener { showDeleteECDialog() }
     }
+
 
     // ----------------------- ADD TIPS -----------------------
     private fun showAddDialog() {
@@ -179,5 +197,212 @@ class AdminFragment : Fragment() {
     private fun redirectToDashboard() {
         // Replace with your actual navigation method to go back to dashboard
         requireActivity().supportFragmentManager.popBackStack()
+    }
+
+
+    // ----------------- ADD EMERGENCY CONTACT -----------------
+    private fun showAddECDialog() {
+        val dialogView = LayoutInflater.from(requireContext())
+            .inflate(R.layout.add_ec_dialog, null)
+
+        val spinnerType = dialogView.findViewById<Spinner>(R.id.spinnerType)
+        val inputName = dialogView.findViewById<EditText>(R.id.inputName)
+        val inputNumber = dialogView.findViewById<EditText>(R.id.inputNumber)
+        val inputDesc = dialogView.findViewById<EditText>(R.id.inputDesc)
+
+        // Load types from string-array instead of Firestore
+        val types = resources.getStringArray(R.array.emergency_types)
+        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, types)
+        spinnerType.adapter = adapter
+
+        AlertDialog.Builder(requireContext())
+            .setTitle("Add Emergency Contact")
+            .setView(dialogView)
+            .setPositiveButton("Add") { dialog, _ ->
+                val selectedType = spinnerType.selectedItem.toString()
+                val name = inputName.text.toString().trim()
+                val number = inputNumber.text.toString().trim()
+                val desc = inputDesc.text.toString().trim()
+
+                if (name.isEmpty() || number.isEmpty()) {
+                    Toast.makeText(requireContext(), "Name and Number are required", Toast.LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
+
+                val contact = hashMapOf(
+                    "name" to name,
+                    "number" to number,
+                    "description" to desc
+                )
+
+                // Save to Firestore dynamically
+                val docRef = db.collection("emergency_contacts").document(selectedType)
+                docRef.get().addOnSuccessListener { doc ->
+                    if (doc.exists()) {
+                        // Add new contact to existing type
+                        docRef.update("contacts", FieldValue.arrayUnion(contact))
+                    } else {
+                        // Create type document if it doesn't exist
+                        docRef.set(hashMapOf("contacts" to listOf(contact)))
+                    }
+                    Toast.makeText(requireContext(), "Contact added successfully!", Toast.LENGTH_SHORT).show()
+                    redirectToDashboard()
+                }.addOnFailureListener { e ->
+                    Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+                dialog.dismiss()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+
+    // ----------------- EDIT EMERGENCY CONTACT -----------------
+    private fun showEditECDialog() {
+        val dialogView = LayoutInflater.from(requireContext())
+            .inflate(R.layout.edit_ec_dialog, null)
+
+        val spinnerType = dialogView.findViewById<Spinner>(R.id.spinnerType)
+        val spinnerContact = dialogView.findViewById<Spinner>(R.id.spinnerContact)
+        val inputName = dialogView.findViewById<EditText>(R.id.inputName)
+        val inputNumber = dialogView.findViewById<EditText>(R.id.inputNumber)
+        val inputDesc = dialogView.findViewById<EditText>(R.id.inputDesc)
+
+        var originalContact: Map<String, String>? = null
+
+        db.collection("emergency_contacts").get().addOnSuccessListener { snapshot ->
+            val firestoreTypes = snapshot.documents.map { it.id }
+            val types = if (firestoreTypes.isEmpty()) {
+                resources.getStringArray(R.array.emergency_types).toList()
+            } else {
+                firestoreTypes
+            }
+
+            spinnerType.adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, types)
+
+            spinnerType.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                    val selectedType = types[position]
+                    val docRef = db.collection("emergency_contacts").document(selectedType)
+                    docRef.get().addOnSuccessListener { doc ->
+                        val contacts = doc.get("contacts") as? List<Map<String, String>> ?: emptyList()
+                        val contactNames = contacts.map { it["name"] ?: "Unknown" }
+                        spinnerContact.adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, contactNames)
+
+                        spinnerContact.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                            override fun onItemSelected(p: AdapterView<*>, v: View?, pos: Int, i: Long) {
+                                originalContact = contacts[pos]
+                                inputName.setText(originalContact?.get("name"))
+                                inputNumber.setText(originalContact?.get("number"))
+                                inputDesc.setText(originalContact?.get("description"))
+                            }
+                            override fun onNothingSelected(p: AdapterView<*>) {}
+                        }
+                    }
+                }
+                override fun onNothingSelected(parent: AdapterView<*>) {}
+            }
+        }
+
+        AlertDialog.Builder(requireContext())
+            .setTitle("Edit Emergency Contact")
+            .setView(dialogView)
+            .setPositiveButton("Save") { dialog, _ ->
+                if (originalContact == null) {
+                    Toast.makeText(requireContext(), "No contact selected to edit.", Toast.LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
+
+                val selectedType = spinnerType.selectedItem.toString()
+                val docRef = db.collection("emergency_contacts").document(selectedType)
+
+                val updatedContact = hashMapOf(
+                    "name" to inputName.text.toString().trim(),
+                    "number" to inputNumber.text.toString().trim(),
+                    "description" to inputDesc.text.toString().trim()
+                )
+
+                // Atomically remove the old contact and add the updated one
+                docRef.update("contacts", FieldValue.arrayRemove(originalContact))
+                    .addOnSuccessListener {
+                        docRef.update("contacts", FieldValue.arrayUnion(updatedContact))
+                            .addOnSuccessListener {
+                                Toast.makeText(requireContext(), "Contact updated!", Toast.LENGTH_SHORT).show()
+                                redirectToDashboard()
+                            }
+                    }
+                    .addOnFailureListener { e ->
+                        Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
+                dialog.dismiss()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    // ----------------- DELETE EMERGENCY CONTACT -----------------
+    private fun showDeleteECDialog() {
+        val dialogView = LayoutInflater.from(requireContext())
+            .inflate(R.layout.delete_ec_dialog, null)
+
+        val spinnerType = dialogView.findViewById<Spinner>(R.id.spinnerType)
+        val spinnerContact = dialogView.findViewById<Spinner>(R.id.spinnerContact)
+
+        var contactToDelete: Map<String, String>? = null
+
+        db.collection("emergency_contacts").get().addOnSuccessListener { snapshot ->
+            val firestoreTypes = snapshot.documents.map { it.id }
+            val types = if (firestoreTypes.isEmpty()) {
+                resources.getStringArray(R.array.emergency_types).toList()
+            } else {
+                firestoreTypes
+            }
+
+            spinnerType.adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, types)
+
+            spinnerType.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                    val selectedType = types[position]
+                    val docRef = db.collection("emergency_contacts").document(selectedType)
+                    docRef.get().addOnSuccessListener { doc ->
+                        val contacts = doc.get("contacts") as? List<Map<String, String>> ?: emptyList()
+                        val contactNames = contacts.map { it["name"] ?: "Unknown" }
+                        spinnerContact.adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, contactNames)
+
+                        spinnerContact.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                            override fun onItemSelected(p: AdapterView<*>, v: View?, pos: Int, i: Long) {
+                                contactToDelete = contacts[pos]
+                            }
+                            override fun onNothingSelected(p: AdapterView<*>) {}
+                        }
+                    }
+                }
+                override fun onNothingSelected(parent: AdapterView<*>) {}
+            }
+        }
+
+        AlertDialog.Builder(requireContext())
+            .setTitle("Delete Emergency Contact")
+            .setView(dialogView)
+            .setPositiveButton("Delete") { dialog, _ ->
+                if (contactToDelete == null) {
+                    Toast.makeText(requireContext(), "No contact selected to delete.", Toast.LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
+
+                val selectedType = spinnerType.selectedItem.toString()
+                db.collection("emergency_contacts").document(selectedType)
+                    .update("contacts", FieldValue.arrayRemove(contactToDelete))
+                    .addOnSuccessListener {
+                        Toast.makeText(requireContext(), "Contact deleted!", Toast.LENGTH_SHORT).show()
+                        redirectToDashboard()
+                    }
+                    .addOnFailureListener { e ->
+                        Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
+                dialog.dismiss()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 }

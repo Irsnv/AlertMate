@@ -11,4 +11,12 @@
         <item>Shah Alam</item>
     </string-array>
 
+    <string-array name="emergency_types">
+        <item>Fire and Rescue (Bomba)</item>
+        <item>Police</item>
+        <item>Civil Defence (JPAM)</item>
+        <item>Hospital or Ambulance</item>
+    </string-array>
+
+
 </resources>
