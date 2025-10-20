@@ -8,9 +8,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import com.example.alertmate.AdminFragment
+import com.example.alertmate.fragment.NewsFragment
 import com.example.alertmate.home.HomeFragment
-import com.example.alertmate.profile.ProfileFragment
+import com.example.alertmate.fragment.ProfileFragment
+import com.example.alertmate.fragment.TipsFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class MainActivity : AppCompatActivity() {

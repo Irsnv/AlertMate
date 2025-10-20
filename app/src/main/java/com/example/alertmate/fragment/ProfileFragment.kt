@@ -1,8 +1,11 @@
-package com.example.alertmate.profile
+package com.example.alertmate.fragment
 
+import android.R
 import android.app.AlarmManager
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -11,7 +14,6 @@ import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.example.alertmate.LoginActivity
-import com.example.alertmate.R
 import com.example.alertmate.alert.AlertReceiver
 import com.example.alertmate.databinding.FragmentProfileBinding
 import com.google.firebase.auth.FirebaseAuth
@@ -43,7 +45,8 @@ class ProfileFragment : Fragment() {
 
         // Spinner options
         val locations = arrayOf("Klang", "Shah Alam")
-        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, locations)
+        val adapter =
+            ArrayAdapter(requireContext(), R.layout.simple_spinner_dropdown_item, locations)
         binding.profileLocation.adapter = adapter
 
         // Fetch user data
@@ -95,32 +98,53 @@ class ProfileFragment : Fragment() {
             startActivity(intent)
             activity?.finish()
         }
-        // testalert
+
         binding.btnTestAlert.setOnClickListener {
-            val context = requireContext().applicationContext
-            val intent = Intent(context, AlertReceiver::class.java)
-            context.sendBroadcast(intent)  // simpler, triggers immediately
+            triggerTestAlert()  // now the method is used
         }
+
 
     }
 
     private fun triggerTestAlert() {
         val context = requireContext().applicationContext
         val intent = Intent(context, AlertReceiver::class.java)
-        val pendingIntent = android.app.PendingIntent.getBroadcast(
+
+        // Trigger immediately for testing
+        context.sendBroadcast(intent)
+
+        // Optional: schedule exact alarm for demo (API 28+)
+        val pendingIntent = PendingIntent.getBroadcast(
             context,
             0,
             intent,
-            android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        // Trigger after 1 second for demo
-        alarmManager.setExact(
-            AlarmManager.RTC_WAKEUP,
-            System.currentTimeMillis() + 1000,
-            pendingIntent
-        )
+
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) { // API 31+
+                if (alarmManager.canScheduleExactAlarms()) {
+                    alarmManager.setExact(
+                        AlarmManager.RTC_WAKEUP,
+                        System.currentTimeMillis() + 1000, // 1 second later
+                        pendingIntent
+                    )
+                } else {
+                    Toast.makeText(context, "Enable exact alarms in settings for scheduled alerts.", Toast.LENGTH_LONG).show()
+                }
+            } else {
+                // Older devices: setExact works but exactness may vary
+                alarmManager.setExact(
+                    AlarmManager.RTC_WAKEUP,
+                    System.currentTimeMillis() + 1000,
+                    pendingIntent
+                )
+            }
+        } catch (e: SecurityException) {
+            Toast.makeText(context, "Exact alarm failed: ${e.message}", Toast.LENGTH_LONG).show()
+        }
     }
 
 

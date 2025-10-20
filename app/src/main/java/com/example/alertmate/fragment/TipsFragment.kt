@@ -1,4 +1,4 @@
-package com.example.alertmate
+package com.example.alertmate.fragment
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -7,10 +7,10 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.ScrollView
-import androidx.fragment.app.Fragment
 import android.widget.TextView
+import androidx.fragment.app.Fragment
+import com.example.alertmate.R
 import com.google.firebase.firestore.FirebaseFirestore
-
 
 class TipsFragment : Fragment() {
 
@@ -154,4 +154,3 @@ class TipsFragment : Fragment() {
             }
     }
 }
-
