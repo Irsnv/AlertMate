@@ -9,7 +9,6 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import com.example.alertmate.MainActivity
 import com.example.alertmate.databinding.ActivityLoginBinding
 import com.google.firebase.auth.FirebaseAuth
 
@@ -41,17 +40,11 @@ class LoginActivity: AppCompatActivity() {
                                     if (document != null && document.exists()) {
                                         val role = document.getString("role")
 
-                                        if (role == "admin") {
-                                            // Send admin to AdminActivity (you create this screen)
-                                            val intent = Intent(this, AdminFragment::class.java)
-                                            startActivity(intent)
-                                            finish()
-                                        } else {
-                                            // Default: normal users
-                                            val intent = Intent(this, MainActivity::class.java)
-                                            startActivity(intent)
-                                            finish()
-                                        }
+                                        val intent = Intent(this, MainActivity::class.java)
+                                        intent.putExtra("role", role)
+                                        startActivity(intent)
+                                        finish()
+
                                     } else {
                                         Toast.makeText(this, "User data not found", Toast.LENGTH_SHORT).show()
                                     }

@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import com.example.alertmate.AdminFragment
 import com.example.alertmate.home.HomeFragment
 import com.example.alertmate.profile.ProfileFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -20,6 +21,15 @@ class MainActivity : AppCompatActivity() {
 
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_navigation)
 
+        val role = intent.getStringExtra("role")
+
+        // Show admin button only if admin
+        if (role == "admin") {
+            bottomNav.menu.findItem(R.id.bott_admin).isVisible = true
+        } else {
+            bottomNav.menu.findItem(R.id.bott_admin).isVisible = false
+        }
+
         // Load HomeFragment first when activity starts
         if (savedInstanceState == null) {
             loadFragment(HomeFragment())
@@ -31,9 +41,9 @@ class MainActivity : AppCompatActivity() {
             when (item.itemId) {
                 R.id.bott_home -> loadFragment(HomeFragment())
                 R.id.bott_tips -> loadFragment(TipsFragment())
-                //R.id.bott_alert -> loadFragment(AlertFragment())
                 R.id.bott_profile -> loadFragment(ProfileFragment())
                 R.id.bott_news -> loadFragment(NewsFragment())
+                R.id.bott_admin -> loadFragment(AdminFragment())
                 else -> false
             }
             true

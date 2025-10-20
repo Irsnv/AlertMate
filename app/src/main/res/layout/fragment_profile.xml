@@ -16,12 +16,9 @@
         <!-- Header background -->
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="120dp">
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="#BF0492C2" />
+            android:layout_height="120dp"
+            android:background="@drawable/rounded_frame"
+            android:layout_margin="20dp">
 
             <TextView
                 android:id="@+id/profileTitle"

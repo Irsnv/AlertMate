@@ -10,13 +10,9 @@
     <!-- FrameLayout lets you overlap background + image together -->
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="320dp">
-
-        <!--background 3/4 of the screen-->
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="#BF0492C2"/>
+        android:layout_height="280dp"
+        android:background="@drawable/rounded_frame"
+        android:layout_margin="20dp">
 
         <!--login title-->
         <TextView
@@ -47,7 +43,7 @@
         android:text="Email"
         android:textSize="16sp"
         android:layout_marginStart="32dp"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="14dp"
         android:textColor="#2F2E41"/>
 
     <EditText

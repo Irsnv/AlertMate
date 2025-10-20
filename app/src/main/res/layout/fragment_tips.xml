@@ -55,38 +55,16 @@
             android:layout_marginTop="20dp"
             android:visibility="visible">
 
-            <LinearLayout
+            <TextView
+                android:id="@+id/textViewTips"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:text="Loading tips..."
+                android:textColor="#2F2E41"
+                android:textSize="16sp"
+                android:lineSpacingExtra="6dp"
+                android:letterSpacing="0.02" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Flash Flood Emergency Tips"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:paddingBottom="8dp"/>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="1. Move to higher ground immediately."
-                    android:paddingBottom="4dp"/>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="2. Avoid walking or driving through flood water."
-                    android:paddingBottom="4dp"/>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="3. Keep emergency supplies ready."
-                    android:paddingBottom="4dp"/>
-
-            </LinearLayout>
         </ScrollView>
 
         <ScrollView

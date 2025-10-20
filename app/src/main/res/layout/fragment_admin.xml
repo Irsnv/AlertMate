@@ -1,63 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:background="@color/ceruleanblue">
 
     <LinearLayout
-        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:divider="?android:attr/dividerHorizontal"
-        android:showDividers="middle">
+        android:orientation="vertical">
 
-        <!-- News Section -->
-        <TextView
-            android:text="Manage News"
-            android:textStyle="bold"
-            android:textSize="18sp"
-            android:padding="8dp"/>
-        <Button
-            android:id="@+id/btnAddNews"
-            android:text="Add News"/>
-        <Button
-            android:id="@+id/btnEditNews"
-            android:text="Edit/Delete News"/>
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="120dp"
+            android:background="@drawable/rounded_frame_2">
 
-        <!-- Tips Section -->
-        <TextView
-            android:text="Manage Tips"
-            android:textStyle="bold"
-            android:textSize="18sp"
-            android:padding="8dp"/>
-        <Button
-            android:id="@+id/btnAddTip"
-            android:text="Add Tip"/>
-        <Button
-            android:id="@+id/btnEditTip"
-            android:text="Edit/Delete Tip"/>
+            <TextView
+                android:id="@+id/AdminDash"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Asmin \nDashboard"
+                android:textColor="@color/ceruleanblue"
+                android:textSize="32sp"
+                android:textStyle="bold"
+                android:layout_gravity="center|center_vertical"
+                android:layout_marginRight="70dp"/>
 
-        <!-- Emergency Numbers -->
-        <TextView
-            android:text="Manage Emergency Numbers"
-            android:textStyle="bold"
-            android:textSize="18sp"
-            android:padding="8dp"/>
-        <Button
-            android:id="@+id/btnAddEmergency"
-            android:text="Add Emergency Number"/>
-        <Button
-            android:id="@+id/btnEditEmergency"
-            android:text="Edit/Delete Emergency Numbers"/>
+            <!--logo-->
+            <ImageView
+                android:id="@+id/RegImg"
+                android:layout_width="145dp"
+                android:layout_height="87dp"
+                android:src="@drawable/admin_illustrate"
+                android:layout_gravity="bottom|center_horizontal"
+                android:layout_marginLeft="80dp"/>
+        </FrameLayout>
 
-        <!-- Alerts -->
-        <TextView
-            android:text="Send Alerts"
-            android:textStyle="bold"
-            android:textSize="18sp"
-            android:padding="8dp"/>
+        <LinearLayout
+            android:id="@+id/TipsSec"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:background="@drawable/rounded_frame_2"
+            android:layout_marginTop="16dp">
+
+            <TextView
+                android:id="@+id/tv_TipsTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Tips/Guidance"
+                android:textStyle="bold"
+                android:textSize="24sp"
+                android:textColor="@color/ceruleanblue"
+                android:gravity="center"
+                android:layout_margin="8dp"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:layout_margin="4dp">
+
+                <Button
+                    android:id="@+id/btnAddTips"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Add"
+                    android:backgroundTint="#00B894"
+                    android:layout_margin="4dp"/>
+
+                <Button
+                    android:id="@+id/btnEditTips"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Edit"
+                    android:backgroundTint="#1E90FF"
+                    android:layout_margin="4dp"/>
+
+                <Button
+                    android:id="@+id/btnDelTips"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Delete"
+                    android:backgroundTint="#E74C3C"
+                    android:layout_margin="4dp"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/EmerContSec"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/rounded_frame_2"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tv_EmerContTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:gravity="center"
+                android:text="Emergency Contact"
+                android:textColor="@color/ceruleanblue"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin="4dp"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btnAddEC"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="4dp"
+                    android:layout_weight="1"
+                    android:backgroundTint="#00B894"
+                    android:text="Add" />
+
+                <Button
+                    android:id="@+id/btnEditEC"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="4dp"
+                    android:layout_weight="1"
+                    android:backgroundTint="#1E90FF"
+                    android:text="Edit" />
+
+                <Button
+                    android:id="@+id/btnDelEC"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="4dp"
+                    android:layout_weight="1"
+                    android:backgroundTint="#E74C3C"
+                    android:text="Delete" />
+            </LinearLayout>
+        </LinearLayout>
+
+
         <Button
             android:id="@+id/btnSendAlert"
-            android:text="Send New Alert"/>
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Send Alert to Users" />
 
     </LinearLayout>
+
 </ScrollView>

@@ -15,15 +15,17 @@
         android:id="@+id/bott_home"
         android:title="Home"
         android:icon="@drawable/home"/>
-    <!--
-    <item
-        android:id="@+id/bott_alert"
-        android:title="Alert"
-        android:icon="@drawable/notification"/>-->
 
     <item
         android:id="@+id/bott_tips"
         android:title="Tips"
         android:icon="@drawable/services"/>
+
+    <item
+        android:id="@+id/bott_admin"
+        android:title="Admin"
+        android:icon="@drawable/administrator"
+        android:visible="false" />
+
 
 </menu>
