@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import coil.load
 import com.example.alertmate.R
 import com.example.alertmate.data.HourlyItem
 import java.text.SimpleDateFormat
@@ -45,13 +46,16 @@ class HourlyAdapter(
 
         val main = item.weather?.firstOrNull()?.main
         val desc = item.weather?.firstOrNull()?.description
-        val iconCode = item.weather?.firstOrNull()?.icon
         val tempValue = item.temp
 
-        // Use combined resolver (temperature-aware)
-        val (label, resId) = IconReplace.resolve(tempValue, main, desc, iconCode)
-        holder.tempdescTxt.text = label
-        holder.pic.setImageResource(resId)
+        val iconCode = item.weather?.firstOrNull()?.icon ?: "01d"
+        holder.pic.load("https://openweathermap.org/img/wn/${iconCode}@2x.png") {
+            crossfade(true)
+            placeholder(R.drawable.sunny)
+            error(R.drawable.sunny)
+        }
+        holder.tempdescTxt.text = desc ?: main ?: "Unknown"
+
 
 
         // Highlight selected hour (optional visual)

@@ -60,9 +60,13 @@ class DailyAdapter(
         // --- Icon (Fixed with IconReplace) ---
         val main = daily.weather?.firstOrNull()?.main
         val desc = daily.weather?.firstOrNull()?.description
-        val iconCode = daily.weather?.firstOrNull()?.icon
-        val (label, iconRes) = IconReplace.resolve(daily.temp?.day, main, desc, iconCode)
-        holder.ivIcon.setImageResource(iconRes)
+        val iconCode = daily.weather?.firstOrNull()?.icon ?: "01d"
+        holder.ivIcon.load("https://openweathermap.org/img/wn/${iconCode}@2x.png") {
+            crossfade(true)
+            placeholder(R.drawable.sunny)
+            error(R.drawable.sunny)
+        }
+
     }
 
     override fun getItemCount(): Int = items.size

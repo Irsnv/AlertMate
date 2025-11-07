@@ -56,6 +56,11 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:34.3.0"))
     implementation ("com.google.firebase:firebase-auth")
     implementation ("com.google.firebase:firebase-firestore")
+    implementation("com.google.firebase:firebase-analytics")
+//realtime database
+    implementation ("com.google.firebase:firebase-database")
+//firebase messaging// Firebase Cloud Messaging
+    implementation("com.google.firebase:firebase-messaging")
 //scalable size unit (support for diff screen size)
     implementation("com.intuit.sdp:sdp-android:1.1.0")
     implementation("com.intuit.ssp:ssp-android:1.1.0")

@@ -19,7 +19,7 @@
                 android:id="@+id/AdminDash"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Asmin \nDashboard"
+                android:text="Admin \nDashboard"
                 android:textColor="@color/ceruleanblue"
                 android:textSize="32sp"
                 android:textStyle="bold"
@@ -144,12 +144,66 @@
             </LinearLayout>
         </LinearLayout>
 
-
-        <Button
-            android:id="@+id/btnSendAlert"
+        <LinearLayout
+            android:id="@+id/WarningSec"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Send Alert to Users" />
+            android:layout_height="match_parent"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/rounded_frame_2"
+            android:orientation="vertical">
+
+            <!-- Location -->
+            <TextView
+                android:id="@+id/tv_WarningTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:gravity="center"
+                android:text="Send Warning to User"
+                android:textColor="@color/ceruleanblue"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+
+            <Spinner
+                android:id="@+id/profileLocation"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginHorizontal="24dp"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/input_field"
+                android:spinnerMode="dropdown" />
+
+            <!-- TextView for Location A -->
+            <TextView
+                android:id="@+id/tvLocKlang"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="24dp"
+                android:text="Flash floods have been reported in several areas of Klang. \nPlease stay alert and take necessary precautions."
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                android:visibility="gone" />
+
+            <!-- TextView for Location B -->
+            <TextView
+                android:id="@+id/tvLocShahAlam"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="24dp"
+                android:text="Flash floods have been reported in several areas of Shah Alam. \nPlease stay alert and take necessary precautions."
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                android:visibility="gone" />
+
+            <Button
+                android:id="@+id/btnSendWarn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:backgroundTint="#E74C3C"
+                android:text="Send" />
+
+        </LinearLayout>
 
     </LinearLayout>
 

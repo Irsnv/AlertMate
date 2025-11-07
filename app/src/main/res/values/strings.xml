@@ -18,5 +18,7 @@
         <item>Hospital or Ambulance</item>
     </string-array>
 
+    <string name="msg_klang">Flash floods have been reported in several areas of Klang. Please stay alert and take necessary precautions.</string>
+    <string name="msg_shah_alam">Flash floods have been reported in several areas of Shah Alam. Please stay alert and take necessary precautions.</string>
 
 </resources>

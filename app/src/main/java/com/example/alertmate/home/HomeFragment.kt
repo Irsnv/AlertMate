@@ -1,9 +1,13 @@
 package com.example.alertmate.home
 
 import android.app.AlarmManager
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.provider.Settings
+import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -22,6 +26,7 @@ import retrofit2.HttpException
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.roundToInt
+import com.google.android.material.snackbar.Snackbar // Correct for Views
 
 class HomeFragment : Fragment() {
 
@@ -57,21 +62,32 @@ class HomeFragment : Fragment() {
         // Set current date
         binding.textCurrentDate.text = getCurrentDate()
 
-        // Get current user ID
-        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        val db = FirebaseFirestore.getInstance()
+        val user = FirebaseAuth.getInstance().currentUser ?: return
 
-        // Fetch weather on load
-        fetchUserLocation(userId) { lat, lon, cityName ->
-            fetchWeatherData(lat, lon, cityName)
+        // ✅ Check user's role before listening for alerts
+        db.collection("users").document(user.uid).get().addOnSuccessListener { document ->
+            val role = document.getString("role") ?: "user"
+
+            fetchUserLocation(user.uid) { lat, lon, cityName ->
+                fetchWeatherData(lat, lon, cityName)
+
+                // ✅ Only normal users receive alerts
+                if (role != "admin") {
+                    listenForAlerts(cityName)
+                    listenForRealtimeAlerts()
+                }
+            }
         }
 
         // Swipe to refresh
         binding.swipeRefreshLayout.setOnRefreshListener {
-            fetchUserLocation(userId) { lat, lon, cityName ->
+            fetchUserLocation(user.uid) { lat, lon, cityName ->
                 fetchWeatherData(lat, lon, cityName)
             }
         }
     }
+
 
     // Get current date
     private fun getCurrentDate(): String {
@@ -98,17 +114,40 @@ class HomeFragment : Fragment() {
                 if (document.exists()) {
                     val location = document.getString("location")
                     when (location) {
-                        "Klang" -> onResult(3.0392, 101.4419, "Klang")
-                        "Shah Alam" -> onResult(3.0734, 101.5217, "Shah Alam")
-                        else -> onResult(3.0734, 101.5217, "Shah Alam")
+                        "Klang" -> {
+                            subscribeToLocationTopic("Klang") // 👈 Add this line
+                            onResult(3.0392, 101.4419, "Klang")
+                        }
+                        "Shah Alam" -> {
+                            subscribeToLocationTopic("Shah Alam") // 👈 Add this line
+                            onResult(3.0734, 101.5217, "Shah Alam")
+                        }
+                        else -> {
+                            subscribeToLocationTopic("Shah Alam")
+                            onResult(3.0734, 101.5217, "Shah Alam")
+                        }
                     }
                 }
             }
             .addOnFailureListener {
+                subscribeToLocationTopic("Shah Alam")
                 onResult(3.0734, 101.5217, "Shah Alam")
             }
     }
 
+    // Subscribe user to location-based FCM topic
+    private fun subscribeToLocationTopic(userLocation: String) {
+        val topic = "alerts_${userLocation.replace(" ", "").lowercase()}" // e.g. alerts_klang
+        com.google.firebase.messaging.FirebaseMessaging.getInstance().subscribeToTopic(topic)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    // Optional: Log or show success
+                    println("Subscribed to topic: $topic")
+                } else {
+                    println("Failed to subscribe to topic: $topic")
+                }
+            }
+    }
     // Fetch weather from OpenWeatherMap
     private fun fetchWeatherData(lat: Double, lon: Double, cityName: String) {
         showLoading()
@@ -141,6 +180,7 @@ class HomeFragment : Fragment() {
 
                     // Weather Icon
                     val icon = current?.weather?.get(0)?.icon ?: "01d"
+                    Log.d("WeatherIcon", "Current weather icon code: $icon")
                     binding.imgView.load("https://openweathermap.org/img/wn/${icon}@2x.png") {
                         crossfade(true)
                         placeholder(R.drawable.sunny)
@@ -200,9 +240,15 @@ class HomeFragment : Fragment() {
                             // set description label
                             val main = item.weather?.firstOrNull()?.main
                             val desc = item.weather?.firstOrNull()?.description
-                            val (label, iconRes) = IconReplace.resolve(item.temp, main, desc, item.weather?.firstOrNull()?.icon)
-                            binding.tvChaOfRain.text = label
-                            binding.imgView.setImageResource(iconRes)
+                            val iconCode = item.weather?.firstOrNull()?.icon ?: "01d"
+                            Log.d("WeatherIcon", "Hourly icon code: $iconCode")
+                            binding.imgView.load("https://openweathermap.org/img/wn/${iconCode}@2x.png") {
+                                crossfade(true)
+                                placeholder(R.drawable.sunny)
+                                error(R.drawable.sunny)
+                            }
+                            binding.tvChaOfRain.text = desc ?: main ?: "N/A"
+
 
                         }
                     }
@@ -261,20 +307,115 @@ class HomeFragment : Fragment() {
     }
     private fun scheduleAlert(triggerAtMillis: Long) {
         val context = requireContext().applicationContext
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+        // Check for permission on Android 12 (S) and above
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (!alarmManager.canScheduleExactAlarms()) {
+                // Permission is not granted, guide the user to settings.
+                Snackbar.make(
+                    binding.root,
+                    "Permission needed to show timely storm alerts.",
+                    Snackbar.LENGTH_LONG
+                ).setAction("Grant") {
+                    // Use the correct Settings class
+                    val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
+                    startActivity(intent)
+                }.show()
+                return // Don't schedule the alarm if permission is missing
+            }
+        }
+
+        // --- If permission is granted (or on older OS), proceed with scheduling ---
         val intent = Intent(context, AlertReceiver::class.java)
-        val pendingIntent = android.app.PendingIntent.getBroadcast(
+        val pendingIntent = PendingIntent.getBroadcast(
             context,
-            0,
+            0, // A unique request code
             intent,
-            android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        val alarmManager = requireContext().getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        alarmManager.setExact(
+        // For testing, this schedules the alarm 10 seconds from now.
+        // In production, you would use `triggerAtMillis`.
+        val testTriggerTime = System.currentTimeMillis() + 10000
+
+        alarmManager.setExactAndAllowWhileIdle(
             AlarmManager.RTC_WAKEUP,
-            System.currentTimeMillis() + 10000,  // 10 seconds later
+            testTriggerTime, // Use your calculated `triggerAtMillis` here
             pendingIntent
         )
+
+        Log.d("AlarmScheduler", "Exact alarm scheduled for a potential thunderstorm.")
+    }
+
+    // === Listen for location-based alerts ===
+    private fun listenForAlerts(userLocation: String) {
+        db.collection("alerts")
+            .whereArrayContains("locations", userLocation) // Changed to whereArrayContains
+            .addSnapshotListener { snapshots, e ->
+                if (e != null || snapshots == null) {
+                    // It's good practice to log the error
+                    Log.w("Firestore", "Listen failed.", e)
+                    return@addSnapshotListener
+                }
+
+                for (dc in snapshots.documentChanges) {
+                    if (dc.type == com.google.firebase.firestore.DocumentChange.Type.ADDED) {
+                        val alertId = dc.document.id
+                        val message = dc.document.getString("message") ?: continue
+
+                        if (!hasAlertBeenShownBefore(alertId)) {
+                            showFullScreenPopup(message)
+                            markAlertAsShown(alertId)
+                        }
+                    }
+                }
+            }
+    }
+
+    // === Show popup screen when alert received ===
+    private fun showFullScreenPopup(message: String) {
+        val intent = Intent(requireContext(), com.example.alertmate.alert.WarningPopupActivity::class.java)
+        intent.putExtra("ALERT_MESSAGE", message)
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        startActivity(intent)
+    }
+
+    private fun hasAlertBeenShownBefore(alertId: String): Boolean {
+        val prefs = requireContext().getSharedPreferences("shown_alerts", Context.MODE_PRIVATE)
+        return prefs.getBoolean(alertId, false)
+    }
+
+    private fun markAlertAsShown(alertId: String) {
+        val prefs = requireContext().getSharedPreferences("shown_alerts", Context.MODE_PRIVATE)
+        prefs.edit().putBoolean(alertId, true).apply()
+    }
+
+    // === Listen for Realtime Database alerts ===
+    private fun listenForRealtimeAlerts() {
+        val dbRef = com.google.firebase.database.FirebaseDatabase
+            .getInstance("https://alertmate-6eaf4-default-rtdb.asia-southeast1.firebasedatabase.app/")
+            .getReference("alerts")
+
+        dbRef.addChildEventListener(object : com.google.firebase.database.ChildEventListener {
+            override fun onChildAdded(snapshot: com.google.firebase.database.DataSnapshot, previousChildName: String?) {
+                val message = snapshot.child("message").getValue(String::class.java)
+                val alertId = snapshot.key ?: return
+
+                // Prevent showing the same alert multiple times
+                if (message != null && !hasAlertBeenShownBefore(alertId)) {
+                    showFullScreenPopup(message)
+                    markAlertAsShown(alertId)
+                }
+            }
+
+            override fun onChildChanged(snapshot: com.google.firebase.database.DataSnapshot, previousChildName: String?) {}
+            override fun onChildRemoved(snapshot: com.google.firebase.database.DataSnapshot) {}
+            override fun onChildMoved(snapshot: com.google.firebase.database.DataSnapshot, previousChildName: String?) {}
+            override fun onCancelled(error: com.google.firebase.database.DatabaseError) {
+                android.util.Log.e("RealtimeDB", "Error listening for alerts", error.toException())
+            }
+        })
     }
 
 

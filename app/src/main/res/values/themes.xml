@@ -8,4 +8,11 @@
     </style>
 
     <style name="Theme.AlertMate" parent="Base.Theme.AlertMate" />
+
+    <!-- Custom theme with no action bar (for popup screen) -->
+    <style name="Theme.AlertMate.NoActionBar" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowBackground">@android:color/black</item>
+    </style>
 </resources>
