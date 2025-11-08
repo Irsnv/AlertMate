@@ -74,7 +74,6 @@ class HomeFragment : Fragment() {
 
                 // ✅ Only normal users receive alerts
                 if (role != "admin") {
-                    listenForAlerts(cityName)
                     listenForRealtimeAlerts()
                 }
             }
@@ -351,10 +350,9 @@ class HomeFragment : Fragment() {
     // === Listen for location-based alerts ===
     private fun listenForAlerts(userLocation: String) {
         db.collection("alerts")
-            .whereArrayContains("locations", userLocation) // Changed to whereArrayContains
+            .whereEqualTo("location", userLocation) // ✅ Only alerts for this location
             .addSnapshotListener { snapshots, e ->
                 if (e != null || snapshots == null) {
-                    // It's good practice to log the error
                     Log.w("Firestore", "Listen failed.", e)
                     return@addSnapshotListener
                 }
@@ -363,9 +361,11 @@ class HomeFragment : Fragment() {
                     if (dc.type == com.google.firebase.firestore.DocumentChange.Type.ADDED) {
                         val alertId = dc.document.id
                         val message = dc.document.getString("message") ?: continue
+                        val location = dc.document.getString("location") ?: "Unknown"
 
+                        // ✅ Show once only
                         if (!hasAlertBeenShownBefore(alertId)) {
-                            showFullScreenPopup(message)
+                            showFullScreenPopup(message, location)
                             markAlertAsShown(alertId)
                         }
                     }
@@ -374,13 +374,15 @@ class HomeFragment : Fragment() {
     }
 
     // === Show popup screen when alert received ===
-    private fun showFullScreenPopup(message: String) {
+    private fun showFullScreenPopup(message: String, location: String) {
         val intent = Intent(requireContext(), com.example.alertmate.alert.WarningPopupActivity::class.java)
-        intent.putExtra("ALERT_MESSAGE", message)
+        intent.putExtra("title", "Emergency Alert: $location")
+        intent.putExtra("message", message)
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         startActivity(intent)
     }
 
+    // === Prevent showing same alert twice ===
     private fun hasAlertBeenShownBefore(alertId: String): Boolean {
         val prefs = requireContext().getSharedPreferences("shown_alerts", Context.MODE_PRIVATE)
         return prefs.getBoolean(alertId, false)
@@ -399,13 +401,17 @@ class HomeFragment : Fragment() {
 
         dbRef.addChildEventListener(object : com.google.firebase.database.ChildEventListener {
             override fun onChildAdded(snapshot: com.google.firebase.database.DataSnapshot, previousChildName: String?) {
-                val message = snapshot.child("message").getValue(String::class.java)
                 val alertId = snapshot.key ?: return
+                val message = snapshot.child("message").getValue(String::class.java)
+                val location = snapshot.child("location").getValue(String::class.java) ?: "Unknown"
 
-                // Prevent showing the same alert multiple times
-                if (message != null && !hasAlertBeenShownBefore(alertId)) {
-                    showFullScreenPopup(message)
-                    markAlertAsShown(alertId)
+                // ✅ Show only if it matches user's location and not shown before
+                val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+                fetchUserLocation(userId) { _, _, userCity ->
+                    if (userCity == location && message != null && !hasAlertBeenShownBefore(alertId)) {
+                        showFullScreenPopup(message, location)
+                        markAlertAsShown(alertId)
+                    }
                 }
             }
 
@@ -413,14 +419,9 @@ class HomeFragment : Fragment() {
             override fun onChildRemoved(snapshot: com.google.firebase.database.DataSnapshot) {}
             override fun onChildMoved(snapshot: com.google.firebase.database.DataSnapshot, previousChildName: String?) {}
             override fun onCancelled(error: com.google.firebase.database.DatabaseError) {
-                android.util.Log.e("RealtimeDB", "Error listening for alerts", error.toException())
+                Log.e("RealtimeDB", "Error listening for alerts", error.toException())
             }
         })
     }
 
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
-    }
 }
