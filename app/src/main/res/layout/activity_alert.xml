@@ -17,7 +17,7 @@
         android:textSize="36sp"
         android:gravity="center"
         android:textColor="@color/white"
-        android:layout_marginTop="90dp" />
+        android:layout_marginTop="100dp" />
 
     <!-- Alert Image -->
     <ImageView
@@ -51,6 +51,6 @@
         android:textColor="@color/white"
         app:backgroundTint="@null"
         android:background="@drawable/stop_btn"
-        android:layout_marginTop="100dp"/>
+        android:layout_marginTop="110dp"/>
 
 </LinearLayout>

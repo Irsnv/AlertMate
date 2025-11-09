@@ -64,6 +64,79 @@
                     android:textColor="@color/white"
                     android:layout_marginTop="8dp"/>
             </LinearLayout>
+            <!-- News Item 2 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/news_border"
+                android:padding="30dp"
+                android:layout_marginBottom="12dp">
+
+                <TextView
+                    android:id="@+id/newsTitle2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Flash Floods Hit Klang After Heavy Downpour"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/white"/>
+
+                <TextView
+                    android:id="@+id/newsDateTime2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Date: 20 Jun 2025 | Time: 8:00 AM"
+                    android:textSize="14sp"
+                    android:textColor="@color/white"
+                    android:layout_marginTop="4dp"/>
+
+                <TextView
+                    android:id="@+id/newsDesc2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Several areas in Klang including Bandar Puteri and Sentosa were flooded after continuous rainfall since early morning. Authorities deployed rescue teams to assist trapped residents."
+                    android:textSize="16sp"
+                    android:textColor="@color/white"
+                    android:layout_marginTop="8dp"/>
+            </LinearLayout>
+            <!-- News Item 3 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/news_border"
+                android:padding="30dp"
+                android:layout_marginBottom="12dp">
+
+                <TextView
+                    android:id="@+id/newsTitle3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Heavy Rain Causes Flooding in Section 13, Shah Alam"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/white"/>
+
+                <TextView
+                    android:id="@+id/newsDateTime3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Date: 11 Apr 2025 | Time: 9:45 AM"
+                    android:textSize="14sp"
+                    android:textColor="@color/white"
+                    android:layout_marginTop="4dp"/>
+
+                <TextView
+                    android:id="@+id/newsDesc3"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Residents of Section 13, Shah Alam reported rising water levels following heavy rainfall. Several cars were submerged, and traffic delays were experienced around Stadium Shah Alam."
+                    android:textSize="16sp"
+                    android:textColor="@color/white"
+                    android:layout_marginTop="8dp"/>
+            </LinearLayout>
+
 
             <!-- dummy hardcode display news add manually if want more -->
 

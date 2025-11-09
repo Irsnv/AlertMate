@@ -120,7 +120,7 @@ class TipsFragment : Fragment() {
                     // Type title
                     val typeText = TextView(requireContext()).apply {
                         text = " $typeName"
-                        textSize = 16f
+                        textSize = 17f
                         setPadding(0, 8, 0, 4)
                     }
                     contactsLayout.addView(typeText)
