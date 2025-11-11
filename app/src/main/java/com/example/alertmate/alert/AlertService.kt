@@ -20,6 +20,7 @@ class AlertService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Log.d("AlertService", "Service started")
 
+        //=== Create a notification channel needed for Android 8.0+ ---
         val channelId = "alert_channel"
         val channel = NotificationChannel(channelId, "Weather Alert", NotificationManager.IMPORTANCE_HIGH)
         channel.enableVibration(true)
@@ -27,15 +28,16 @@ class AlertService : Service() {
         val manager = getSystemService(NotificationManager::class.java)
         manager.createNotificationChannel(channel)
 
-        // Full-screen intent
+        //=== Full-screen intent ===
         val fullScreenIntent = Intent(this, AlertActivity::class.java)
         fullScreenIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
         val fullScreenPendingIntent = PendingIntent.getActivity(
             this, 0, fullScreenIntent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
-
+        //=== Set alarm sound for notification ===
         val alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
 
+        //=== Build the notification ===
         val notification = NotificationCompat.Builder(this, channelId)
             .setSmallIcon(R.drawable.notification_bell)
             .setContentTitle("Thunderstorm Alert")
@@ -49,9 +51,8 @@ class AlertService : Service() {
 
         startForeground(1, notification)
 
-        // Do NOT call startActivity() from service
+        //dontall startActivity() from service
         return START_NOT_STICKY
     }
-
     override fun onBind(intent: Intent?): IBinder? = null
 }

@@ -21,15 +21,17 @@ class RegisterActivity : AppCompatActivity() {
         binding = ActivityRegisterBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        //initialize firestore and firebase auth
         firebaseAuth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()
 
-        // Spinner options (locations)
+        //spinner dropdown options (locations)
         val options = arrayOf("Select your location", "Klang", "Shah Alam")
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, options)
         binding.locOptions.adapter = adapter
 
-        // Register button
+        //=== register button ===
+        //get all user detail
         binding.regBtn.setOnClickListener {
             val fullname = binding.inputFullname.text.toString().trim()
             val email = binding.inputEmail.text.toString().trim()
@@ -38,33 +40,35 @@ class RegisterActivity : AppCompatActivity() {
             val confirmPassword = binding.inputConfi.text.toString()
             val location = binding.locOptions.selectedItem.toString()
 
-            // Validation
+            //check if field input not empty
             if (fullname.isNotEmpty() && email.isNotEmpty() && phone.isNotEmpty() &&
                 password.isNotEmpty() && confirmPassword.isNotEmpty() &&
                 location != "Select your location"
             ) {
+                //recheck if pass and reconfirm pass same
                 if (password == confirmPassword) {
                     firebaseAuth.createUserWithEmailAndPassword(email, password)
                         .addOnCompleteListener {
                             if (it.isSuccessful) {
                                 val intent = Intent(this, LoginActivity::class.java)
                                 startActivity(intent)
-
+                                //prepare user data to store inside Firestore
                                 val uid = firebaseAuth.currentUser?.uid ?: return@addOnCompleteListener
                                 val userMap = hashMapOf(
                                     "fullname" to fullname,
                                     "email" to email,
                                     "phone" to phone,
                                     "location" to location,
-                                    "role" to "user"
+                                    "role" to "user" // "user" automatically as default
                                 )
 
+                                //save user data into "users" class in firestore
                                 db.collection("users").document(uid).set(userMap)
                                     .addOnSuccessListener {
-                                        // Show simple toast success
+                                        //show simple toast success
                                         Toast.makeText(this, "Registration successful!", Toast.LENGTH_SHORT).show()
 
-                                        // Redirect to login
+                                        //redirect to login
                                         val intent = Intent(this, LoginActivity::class.java)
                                         startActivity(intent)
                                         finish()

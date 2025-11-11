@@ -22,22 +22,23 @@ class MainActivity : AppCompatActivity() {
 
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_navigation)
 
+        //check user role from login
         val role = intent.getStringExtra("role")
 
-        // Show admin button only if admin
+        //check if user is admin - show admin page - if not hide admin page
         if (role == "admin") {
             bottomNav.menu.findItem(R.id.bott_admin).isVisible = true
         } else {
             bottomNav.menu.findItem(R.id.bott_admin).isVisible = false
         }
 
-        // Load HomeFragment first when activity starts
+        //start with HomeFragment first when activity starts
         if (savedInstanceState == null) {
             loadFragment(HomeFragment())
             bottomNav.selectedItemId = R.id.bott_home
         }
 
-        // Set up Bottom Navigation
+        //tap btn and rediresct to its fragment
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.bott_home -> loadFragment(HomeFragment())
@@ -50,6 +51,7 @@ class MainActivity : AppCompatActivity() {
             true
         }
 
+        //req permission android 13 and above for notificaion
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS)
                 != PackageManager.PERMISSION_GRANTED) {

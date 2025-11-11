@@ -35,7 +35,7 @@ class DailyAdapter(
     override fun onBindViewHolder(holder: DailyVH, position: Int) {
         val daily = items[position]
 
-        // --- Date formatting ---
+        //=== Date formatting ===
         val dtSeconds = daily.dt ?: 0L
         val date = Date(dtSeconds * 1000L)
         val daySdf = SimpleDateFormat("EEE", Locale.getDefault())
@@ -46,7 +46,7 @@ class DailyAdapter(
         holder.tvDay.text = daySdf.format(date)
         holder.tvDate.text = dateSdf.format(date)
 
-        // --- Temperature ---
+        //=== Temperature ===
         val tempMax = daily.temp?.max
         val tempMin = daily.temp?.min
         val tempDay = daily.temp?.day
@@ -57,7 +57,7 @@ class DailyAdapter(
             else -> "--°"
         }
 
-        // --- Icon (Fixed with IconReplace) ---
+        //=== Weather Icon ===
         val main = daily.weather?.firstOrNull()?.main
         val desc = daily.weather?.firstOrNull()?.description
         val iconCode = daily.weather?.firstOrNull()?.icon ?: "01d"

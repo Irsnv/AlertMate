@@ -34,20 +34,22 @@ class HourlyAdapter(
     override fun onBindViewHolder(holder: HourlyViewHolder, position: Int) {
         val item = list[position]
 
-        // Time: format dt -> "1 PM"
+        //time: format dt -> "1 PM"
         val ts = (item.dt ?: 0L) * 1000L
         val date = Date(ts)
         val sdf = SimpleDateFormat("h a", Locale.getDefault())
         holder.hourTxt.text = sdf.format(date)
 
-        // Temperature (units=metric assumed)
+        //temperature (units=metric assumed)
         val tempText = item.temp?.roundToInt()?.let { "$it°C" } ?: "--"
         holder.tempTxt.text = tempText
 
+        //weather desc
         val main = item.weather?.firstOrNull()?.main
         val desc = item.weather?.firstOrNull()?.description
         val tempValue = item.temp
 
+        //weathericon
         val iconCode = item.weather?.firstOrNull()?.icon ?: "01d"
         holder.pic.load("https://openweathermap.org/img/wn/${iconCode}@2x.png") {
             crossfade(true)
@@ -56,24 +58,20 @@ class HourlyAdapter(
         }
         holder.tempdescTxt.text = desc ?: main ?: "Unknown"
 
-
-
-        // Highlight selected hour (optional visual)
+        //highlight selected hour
         holder.itemView.isSelected = (position == selectedIndex)
 
-        // On click, mark selected and notify (keeps local selection UI)
         holder.itemView.setOnClickListener {
             val old = selectedIndex
             selectedIndex = position
             notifyItemChanged(old)
             notifyItemChanged(selectedIndex)
-            // Optionally: you can add callback to notify fragment of this click
         }
     }
 
     override fun getItemCount(): Int = list.size
 
-    // Replace adapter data and optionally pre-select an index
+    //replace adapter data and optionally pre-select an index
     fun updateList(newList: List<HourlyItem>, selectIndex: Int = -1) {
         list = newList
         selectedIndex = selectIndex

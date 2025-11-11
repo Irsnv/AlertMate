@@ -7,12 +7,13 @@ import android.widget.Button
 import android.widget.TextView
 import com.example.alertmate.R
 
+
 class WarningPopupActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_warning_popup)
 
-        // Show over lock screen and turn screen on
+        //show over lock screen and turn screen on
         window.addFlags(
             WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
                     or WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED

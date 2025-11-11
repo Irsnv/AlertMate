@@ -59,7 +59,7 @@ class AdminFragment : Fragment() {
     }
 
 
-    // ----------------------- ADD TIPS -----------------------
+    //=== Add Tips===
     private fun showAddDialog() {
         val dialogView =
             LayoutInflater.from(requireContext()).inflate(R.layout.add_tips_dialog, null)
@@ -115,7 +115,7 @@ class AdminFragment : Fragment() {
             .show()
     }
 
-    // ----------------------- EDIT TIPS -----------------------
+    // === Edit Tips ===
     private fun showEditDialog() {
         val dialogView =
             LayoutInflater.from(requireContext()).inflate(R.layout.edit_tips_dialog, null)
@@ -182,7 +182,7 @@ class AdminFragment : Fragment() {
         }
     }
 
-    // ----------------------- DELETE TIPS -----------------------
+    //=== Delete Tips ===
     private fun showDeleteDialog() {
         val dialogView =
             LayoutInflater.from(requireContext()).inflate(R.layout.delete_tips_dialog, null)
@@ -252,14 +252,14 @@ class AdminFragment : Fragment() {
         }
     }
 
-    // ----------------------- Redirect Function -----------------------
+    //=== Redirect Function ===
     private fun redirectToDashboard() {
         // Replace with your actual navigation method to go back to dashboard
         requireActivity().supportFragmentManager.popBackStack()
     }
 
 
-    // ----------------- ADD EMERGENCY CONTACT -----------------
+    //=== Add Emergency Contact ===
     private fun showAddECDialog() {
         val dialogView = LayoutInflater.from(requireContext())
             .inflate(R.layout.add_ec_dialog, null)
@@ -326,7 +326,7 @@ class AdminFragment : Fragment() {
     }
 
 
-    // ----------------- EDIT EMERGENCY CONTACT -----------------
+    //=== Edit Emergency ===
     private fun showEditECDialog() {
         val dialogView = LayoutInflater.from(requireContext())
             .inflate(R.layout.edit_ec_dialog, null)
@@ -437,7 +437,7 @@ class AdminFragment : Fragment() {
             .show()
     }
 
-    // ----------------- DELETE EMERGENCY CONTACT -----------------
+    //=== Delete Emergency ===
     private fun showDeleteECDialog() {
         val dialogView = LayoutInflater.from(requireContext())
             .inflate(R.layout.delete_ec_dialog, null)
@@ -534,12 +534,13 @@ class AdminFragment : Fragment() {
         val tvKlang = view.findViewById<TextView>(R.id.tvLocKlang)
         val tvShahAlam = view.findViewById<TextView>(R.id.tvLocShahAlam)
 
-        // 🔹 Step 1: Populate dropdown options
+        //populate dropdown options
         val locations = listOf("Select location", "Klang", "Shah Alam")
         val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, locations)
         spinner.adapter = adapter
 
-        // 🔹 Step 2: Handle dropdown selection
+        // Handle dropdown selection
+        // Show/hide the warning message for the selected location
         spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
                 val selectedLocation = parent.getItemAtPosition(position).toString()
@@ -556,14 +557,14 @@ class AdminFragment : Fragment() {
             override fun onNothingSelected(parent: AdapterView<*>) {}
         }
 
-        // 🔹 Step 3: Setup Realtime Database + Firestore
+        //setup Realtime Database + Firestore
         val realtimeDb = com.google.firebase.database.FirebaseDatabase
             .getInstance("https://alertmate-6eaf4-default-rtdb.asia-southeast1.firebasedatabase.app/")
             .getReference("alerts")
 
         val firestore = com.google.firebase.firestore.FirebaseFirestore.getInstance()
 
-        // 🔹 Step 4: Send button logic
+        // send button logic
         btnSendWarn.setOnClickListener {
             val selectedLocation = spinner.selectedItem.toString()
 
@@ -585,11 +586,11 @@ class AdminFragment : Fragment() {
             )
 
 
-            // ✅ Send to Firestore (for history)
+            //Send to Firestore (for history)
             firestore.collection("alerts")
                 .add(alertData)
                 .addOnSuccessListener {
-                    // ✅ Also send to Realtime DB (for live alert)
+                    //Also send to Realtime DB (for live alert)
                     val alertId = realtimeDb.push().key ?: "unknown_id"
                     realtimeDb.child(alertId).setValue(alertData)
                         .addOnSuccessListener {
@@ -604,5 +605,4 @@ class AdminFragment : Fragment() {
                 }
         }
     }
-
 }
